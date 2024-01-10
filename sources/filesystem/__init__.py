@@ -68,11 +68,34 @@ def filesystem(
     """
     if isinstance(credentials, AbstractFileSystem):
         fs_client = credentials
+
+        # #301 this too would need the fs_urlpath.
+        #   Require it as a parameter if fs is passed in?
+        #   Or can we just assume any glob is from fs root?
+        #   Otherwise could be messy - need to separate credentials
+        #   from the filesystem.
+        #   Or run fssspec.url_to_fs() again? - should be 
+        #   cheap as fsspec caches filesystem instances.
+        #   Initial attempts below
+
+        # #301 hack to get the clean path again. fsspec provides no other public
+        # method to get this.
+        #_, fs_urlpath = fs_client.url_to_fs(bucket_url, hmmm_how_to_get_credentials)
+
+        # #301 so for now:
+        # AbstractFileSystem instances have so state storing their path
+        # so we can assume any glob is relative to the filesystem's root.
+        # It returns the expected files but:
+        # NOTE: bucket_url path is now ignored in dlt.common.storages so user may get
+        # longer paths than they want, in length inconsistent for differe calls to this Resource.
+        # Need to discuss having bucket url include the glob, and optional explicit path_mask
+        # to customise the paths returned.
+        fs_urlpath = ""
     else:
-        fs_client = fsspec_filesystem(bucket_url, credentials)[0]
+        fs_client, fs_urlpath = fsspec_filesystem(bucket_url, credentials)
 
     files_chunk: List[FileItem] = []
-    for file_model in glob_files(fs_client, bucket_url, file_glob):
+    for file_model in glob_files(fs_client, bucket_url, fs_urlpath, file_glob):
         file_dict = FileItemDict(file_model, credentials)
         if extract_content:
             file_dict["file_content"] = file_dict.read_bytes()
