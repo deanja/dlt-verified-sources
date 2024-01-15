@@ -2,15 +2,18 @@ import os
 
 TESTS_BUCKET_URLS = [
     os.path.abspath("tests/filesystem/samples"),
-    # ToDo: test s3 locally
+    # Toginal:
     # "s3://dlt-ci-test-bucket/standard_source/samples",
-    # ToDo: uncomment gs, az before PR
+    # deanja dev:
+    "s3://flyingfish-dlt-ci-test-bucket/standard_source/samples",
+
     # "gs://ci-test-bucket/standard_source/samples",
     # "az://dlt-ci-test-bucket/standard_source/samples",
-    # ToDo: 
-    #   a) repo ref. relative to current working directory for tess runner?
-    #   b) ref tag with testable history. Do we need such system test?
-    "gitpythonfs://~/dlt-verified-sources:HEAD@tests/filesystem/samples",
+
+    # gitpythonfs variations:
+    # For dlt.common.storages with no support for params in url netloc. If no 
+    # function args provided it defaults to repo in working directory and ref HEAD 
+    "gitpythonfs://tests/filesystem/samples",
 ]
 
 GLOB_RESULTS = [
