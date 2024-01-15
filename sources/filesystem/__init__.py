@@ -2,7 +2,7 @@
 from typing import Iterator, List, Optional, Tuple, Union
 
 import dlt
-from dlt.common.typing import copy_sig
+from dlt.common.typing import copy_sig, DictStrAny
 from dlt.sources import DltResource
 from dlt.sources.filesystem import FileItem, FileItemDict, fsspec_filesystem, glob_files
 from dlt.sources.credentials import FileSystemCredentials
@@ -51,6 +51,9 @@ def filesystem(
     file_glob: Optional[str] = "*",
     files_per_page: int = DEFAULT_CHUNK_SIZE,
     extract_content: bool = False,
+    kwargs: Optional[DictStrAny] = None,
+    client_kwargs: Optional[DictStrAny] = None,
+
 ) -> Iterator[List[FileItem]]:
     """This resource lists files in `bucket_url` using `file_glob` pattern. The files are yielded as FileItem which also
     provide methods to open and read file data. It should be combined with transformers that further process (ie. load files)
@@ -69,7 +72,7 @@ def filesystem(
     if isinstance(credentials, AbstractFileSystem):
         fs_client = credentials
     else:
-        fs_client = fsspec_filesystem(bucket_url, credentials)[0]
+        fs_client = fsspec_filesystem(bucket_url, credentials, kwargs=kwargs, client_kwargs=client_kwargs)[0]
 
     files_chunk: List[FileItem] = []
     for file_model in glob_files(fs_client, bucket_url, file_glob):

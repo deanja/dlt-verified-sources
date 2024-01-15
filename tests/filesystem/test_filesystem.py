@@ -32,11 +32,24 @@ def test_file_list(bucket_url: str, glob_params: Dict[str, Any]) -> None:
     def bypass(items) -> str:
         return items
 
-    # we just pass the glob parameter to the resource if it is not None
-    if file_glob := glob_params["glob"]:
-        filesystem_res = filesystem(bucket_url=bucket_url, file_glob=file_glob) | bypass
+    #301 hacked to try out params with gitpythonfs. ToDo: factor into pytest parameters.
+    if bucket_url.startswith("gitpythonfs"):
+        # we need to pass repo_path and ref to the resource
+        repo_args = {
+                "repo_path": "tests/filesystem/cases/git",
+                "ref": "unmodified-samples"
+                  }
+        # we just pass the glob parameter to the resource if it is not None
+        if file_glob := glob_params["glob"]:
+            filesystem_res = filesystem(bucket_url=bucket_url, file_glob=file_glob, kwargs=repo_args) | bypass
+        else:
+            filesystem_res = filesystem(bucket_url=bucket_url, kwargs=repo_args) | bypass
     else:
-        filesystem_res = filesystem(bucket_url=bucket_url) | bypass
+        # we just pass the glob parameter to the resource if it is not None
+        if file_glob := glob_params["glob"]:
+            filesystem_res = filesystem(bucket_url=bucket_url, file_glob=file_glob) | bypass
+        else:
+            filesystem_res = filesystem(bucket_url=bucket_url) | bypass
 
     all_files = list(filesystem_res)
     file_count = len(all_files)

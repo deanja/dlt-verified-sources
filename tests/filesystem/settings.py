@@ -13,7 +13,11 @@ TESTS_BUCKET_URLS = [
     # gitpythonfs variations:
     # For dlt.common.storages with no support for params in url netloc. If no 
     # function args provided it defaults to repo in working directory and ref HEAD 
-    "gitpythonfs://tests/filesystem/samples",
+    "gitpythonfs://samples",
+    # with separate bare-ish repo in `cases` and repo_path and ref specified in url netloc:
+    # "gitpythonfs://tests/filesystem/cases/git:unmodified-samples@samples",
+
+
 ]
 
 GLOB_RESULTS = [
