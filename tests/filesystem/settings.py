@@ -1,23 +1,31 @@
 import os
 
-TESTS_BUCKET_URLS = [
-    os.path.abspath("tests/filesystem/samples"),
-    # Toginal:
-    # "s3://dlt-ci-test-bucket/standard_source/samples",
+FACTORY_ARGS = [
+    {"bucket_url": os.path.abspath("tests/filesystem/samples")},
+    # Ooginal:
+    # {
+    #     "bucket_url": "s3://dlt-ci-test-bucket/standard_source/samples",
+    #     "kwargs": {"use_ssl": True}
+    # },
     # deanja dev:
-    "s3://flyingfish-dlt-ci-test-bucket/standard_source/samples",
-
-    # "gs://ci-test-bucket/standard_source/samples",
-    # "az://dlt-ci-test-bucket/standard_source/samples",
-
+    {
+        "bucket_url": "s3://flyingfish-dlt-ci-test-bucket/standard_source/samples",
+        "kwargs": {"use_ssl": True}
+    },
+    # {"bucket_url": "gs://ci-test-bucket/standard_source/samples"},
+    # {"bucket_url": "az://dlt-ci-test-bucket/standard_source/samples"},
     # gitpythonfs variations:
-    # For dlt.common.storages with no support for params in url netloc. If no 
-    # function args provided it defaults to repo in working directory and ref HEAD 
-    "gitpythonfs://samples",
-    # with separate bare-ish repo in `cases` and repo_path and ref specified in url netloc:
-    # "gitpythonfs://tests/filesystem/cases/git:unmodified-samples@samples",
-
-
+    # For dlt.common.storages with no support for params in url netloc. If no
+    # function args provided it defaults to repo in working directory and ref HEAD
+    {
+        "bucket_url": "gitpythonfs://samples",
+        "kwargs": {
+            "repo_path": "tests/filesystem/cases/git",
+            "ref": "unmodified-samples",
+        },
+    }
+    # with dedicated test repo in `cases` and repo_path and ref specified in url netloc:
+    # ["bucket_url":"gitpythonfs://tests/filesystem/cases/git:unmodified-samples@samples"],
 ]
 
 GLOB_RESULTS = [
