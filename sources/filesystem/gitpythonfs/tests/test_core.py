@@ -4,7 +4,7 @@ import tempfile
 import shutil
 
 import pytest
-from typing import Iterator
+from typing import Iterator, Tuple
 
 import fsspec
 
@@ -25,7 +25,7 @@ test_fs_kwargs = {"skip_instance_cache": True}
 
 
 @pytest.fixture()
-def repo_fixture() -> Iterator[tuple[str, str]]:
+def repo_fixture() -> Iterator[Tuple[str, str]]:
     """Create a temporary git repository.
 
     Thanks to https://github.com/fsspec/filesystem_spec/blob/master/fsspec/implementations/tests/test_git.py
@@ -76,7 +76,7 @@ def test_register_implementation_in_fsspec() -> None:
     assert cls == GitPythonFileSystem
 
 
-def test_instantiate_fsspec_filesystem(repo_fixture) -> None:
+def test_instantiate_fsspec_filesystem(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test instantiating a filesystem with fsspec."""
     d, _ = repo_fixture
 
@@ -84,7 +84,7 @@ def test_instantiate_fsspec_filesystem(repo_fixture) -> None:
     assert type(fs) == GitPythonFileSystem
 
 
-def test_ls_entries(repo_fixture):
+def test_ls_entries(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test listing folders and files in a repository."""
     d, _ = repo_fixture
     fs = filesystem(PROTOCOL, repo_path=d, **test_fs_kwargs)
@@ -104,7 +104,7 @@ def test_ls_entries(repo_fixture):
     ], "Should return a single file in folder."
 
 
-def test_ls_file_details(repo_fixture) -> None:
+def test_ls_file_details(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test showing details for a file (git.Blob) in a repository."""
 
     # setup
@@ -128,7 +128,7 @@ def test_ls_file_details(repo_fixture) -> None:
     assert isinstance(details["committed_date"], int)
 
 
-def test_git_refs(repo_fixture) -> None:
+def test_git_refs(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test results for git refs - eg commit sha, branch, tag."""
     d, _ = repo_fixture
 
@@ -153,7 +153,7 @@ def test_git_refs(repo_fixture) -> None:
             _ = f.read()
 
 
-def test_git_refs_on_open(repo_fixture) -> None:
+def test_git_refs_on_open(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     d, sha_first = repo_fixture
 
     with fsspec.open(
@@ -169,7 +169,7 @@ def test_git_refs_on_open(repo_fixture) -> None:
         assert f.read() == b"data00", "Should read file version at given tag."
 
 
-def test_git_refs_on_ls(repo_fixture) -> None:
+def test_git_refs_on_ls(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     d, sha_first = repo_fixture
 
     fs = filesystem(PROTOCOL, repo_path=d, ref=sha_first, **test_fs_kwargs)
@@ -199,7 +199,7 @@ def test_get_kwargs_from_urls() -> None:
     assert kwargs["ref"] == ref
 
 
-def test_url(repo_fixture) -> None:
+def test_url(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test reading a file from a repository via url.
 
     For supported url formats see GitPytonFileSystem class doco"""
@@ -223,7 +223,7 @@ def test_url(repo_fixture) -> None:
 @pytest.mark.skip(
     reason="Supplying arg in both url and function call throws fsspec error. Works in other fsspec implementatins?"
 )
-def test_args_precedence(repo_fixture) -> None:
+def test_args_precedence(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test precedence of arguments passed in function parameters
     vs passed in url."""
     d, sha_first = repo_fixture
@@ -234,7 +234,7 @@ def test_args_precedence(repo_fixture) -> None:
         assert f.read() == b"data0", "Should return file for ref supplied in ???."
 
 
-def test_multiple_files(repo_fixture) -> None:
+def test_multiple_files(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test reading multiple files from a repository."""
     d, sha_first = repo_fixture
 
@@ -244,9 +244,10 @@ def test_multiple_files(repo_fixture) -> None:
     ), "Glob should recurse folders and return 4 files that start with `file`."
 
 
-def test_non_readonly_raises_exception(repo_fixture) -> None:
+def test_non_readonly_raises_exception(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test that non-readonly operations raise an exception."""
     d, _ = repo_fixture
+    # d = repo_fixture[0]
 
     with pytest.raises(NotImplementedError):
         GitPythonFileSystem(d, **test_fs_kwargs).mv()

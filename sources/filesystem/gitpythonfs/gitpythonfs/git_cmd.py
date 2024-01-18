@@ -38,7 +38,9 @@ def get_revisions_raw(repo: git.Repo, ref: str, path: str, object_type: str) -> 
             # get objects in root. fnmatch does not like leading slash.
             path_spec += "*"
 
-    out = git_cmd_runner.log(ref, path_spec, raw=True, no_merges=True, pretty="%at")
+    out: str = git_cmd_runner.log(
+        ref, path_spec, raw=True, no_merges=True, pretty="%at"
+    )
     return out
 
 
@@ -59,7 +61,9 @@ def get_revisions_all_raw(repo: git.Repo, ref: str) -> str:
     # git uses fnmatch(3) style matching
     path_spec = ":(top)"
 
-    out = git_cmd_runner.log(ref, path_spec, raw=True, no_merges=True, pretty="%at")
+    out: str = git_cmd_runner.log(
+        ref, path_spec, raw=True, no_merges=True, pretty="%at"
+    )
     return out
 
 
@@ -78,7 +82,6 @@ def parse_git_revlist(git_cmd_output: str) -> Dict[str, int]:
             value: most recent commit timestamp for file
     """
     revisions_info = {}
-    done_files = []
 
     lines = git_cmd_output.splitlines()
     for line in lines:

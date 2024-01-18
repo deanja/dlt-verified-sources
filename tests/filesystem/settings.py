@@ -10,7 +10,7 @@ FACTORY_ARGS = [
     # deanja dev:
     {
         "bucket_url": "s3://flyingfish-dlt-ci-test-bucket/standard_source/samples",
-        "kwargs": {"use_ssl": True}
+        "kwargs": {"use_ssl": True},
     },
     # {"bucket_url": "gs://ci-test-bucket/standard_source/samples"},
     # {"bucket_url": "az://dlt-ci-test-bucket/standard_source/samples"},

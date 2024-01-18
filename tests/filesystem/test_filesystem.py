@@ -13,7 +13,8 @@ from sources.filesystem import (
     FileItemDict,
 )
 
-from sources.filesystem.gitpythonfs import gitpythonfs
+# on import, registers the gitpythonfs implementation with fsspec.
+import gitpythonfs
 
 from tests.utils import (
     assert_load_info,

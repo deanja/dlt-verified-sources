@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Optional, Union
 from fsspec.registry import register_implementation
 from fsspec.spec import AbstractFileSystem
 from fsspec.implementations.memory import MemoryFile
@@ -44,7 +44,9 @@ class GitPythonFileSystem(AbstractFileSystem):
     protocol = "gitpythonfs"
     READ_ONLY_MESSAGE = "This fsspec implementation is read-only."
 
-    def __init__(self, repo_path: str = None, ref: str = None, **kwargs: Any) -> None:
+    def __init__(
+        self, repo_path: Optional[str] = None, ref: Optional[str] = None, **kwargs: Any
+    ) -> None:
         """
         Initialize a GitPythonFS object.
 
@@ -98,9 +100,11 @@ class GitPythonFileSystem(AbstractFileSystem):
         Returns:
             Dict[str, int]: A dictionary mapping file path to file's last modified time
         """
-        return git_cmd.parse_git_revlist(
+
+        result: Dict[str, int] = git_cmd.parse_git_revlist(
             git_cmd.get_revisions_all_raw(self.repo, ref or self.ref)
         )
+        return result
 
     def clear_git_caches(self) -> None:
         """Clear the git caches.
@@ -143,7 +147,7 @@ class GitPythonFileSystem(AbstractFileSystem):
     def _details(
         self,
         object: git.Object,
-        ref: str = None,
+        ref: Optional[str] = None,
         include_committed_date: bool = True,
     ) -> Dict[str, Union[str, int]]:
         """
@@ -178,12 +182,10 @@ class GitPythonFileSystem(AbstractFileSystem):
         return details
 
     def ls(
-        self, path: str, detail: bool = False, ref: str = None, **kwargs: Any
-    ) -> Union[List[str], List[Dict]]:
+        self, path: str, detail: bool = False, ref: Optional[str] = None, **kwargs: Any
+    ) -> Union[List[str], List[Dict[str, Any]]]:
         """List files at given path in the repo."""
         path = self._strip_protocol(path)
-        include_committed_date = kwargs.get("include_committed_date", True)
-        details_by_path = {}
         results = []
 
         # GitPython recommends always starting at root of repo.
@@ -212,10 +214,10 @@ class GitPythonFileSystem(AbstractFileSystem):
         self,
         path: str,
         mode: str = "rb",
-        block_size: int = None,
+        block_size: Optional[int] = None,
         autocommit: bool = True,
-        cache_options=None,
-        ref: str = None,
+        cache_options: Optional[Any] = None,
+        ref: Optional[str] = None,
         **kwargs: Any,
     ) -> MemoryFile:
         path = self._strip_protocol(path)

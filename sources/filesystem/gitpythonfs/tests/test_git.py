@@ -1,3 +1,5 @@
+from typing import Iterator, Tuple
+
 import pytest
 from .test_core import repo_fixture
 
@@ -9,7 +11,7 @@ from gitpythonfs.git_cmd import (
 )
 
 
-def test_get_revisions_all_raw(repo_fixture) -> None:
+def test_get_revisions_all_raw(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test getting all revisions."""
     d, _ = repo_fixture
     repo = Repo(d)
@@ -22,7 +24,7 @@ def test_get_revisions_all_raw(repo_fixture) -> None:
     ), "Should return info for all files in repo"
 
 
-def test_get_revisions_all_raw_at_ref(repo_fixture) -> None:
+def test_get_revisions_all_raw_at_ref(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test getting all revisions at ref."""
     d, sha_first = repo_fixture
     repo = Repo(d)
@@ -33,7 +35,7 @@ def test_get_revisions_all_raw_at_ref(repo_fixture) -> None:
     assert not "file2" in result, "Should not return info for file not existent at ref"
 
 
-def test_get_revisions_raw_at_path(repo_fixture) -> None:
+def test_get_revisions_raw_at_path(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test getting revisions at path."""
     d, _ = repo_fixture
     repo = Repo(d)
@@ -46,7 +48,7 @@ def test_get_revisions_raw_at_path(repo_fixture) -> None:
     ), "Should return info for all files in `inner` directory"
 
 
-def test_get_revisions_raw_at_ref(repo_fixture) -> None:
+def test_get_revisions_raw_at_ref(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test getting revisions at a ref."""
     d, _ = repo_fixture
     repo = Repo(d)
@@ -57,7 +59,9 @@ def test_get_revisions_raw_at_ref(repo_fixture) -> None:
     assert not "file2" in result, "Should not return info for file not existent at ref"
 
 
-def test_get_revisions_raw_one_file_at_root(repo_fixture) -> None:
+def test_get_revisions_raw_one_file_at_root(
+    repo_fixture: Iterator[Tuple[str, str]]
+) -> None:
     """Test getting revisions for a single file at the root."""
     d, sha_first = repo_fixture
     repo = Repo(d)
@@ -68,7 +72,7 @@ def test_get_revisions_raw_one_file_at_root(repo_fixture) -> None:
     assert not "file2" in result, "Should not return info for this other file"
 
 
-def test_get_revisions_raw_at_root(repo_fixture) -> None:
+def test_get_revisions_raw_at_root(repo_fixture: Iterator[Tuple[str, str]]) -> None:
     """Test getting revisions at root directory."""
     d, sha_first = repo_fixture
     repo = Repo(d)
