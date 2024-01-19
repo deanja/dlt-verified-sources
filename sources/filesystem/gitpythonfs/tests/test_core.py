@@ -64,16 +64,30 @@ def repo_fixture() -> Iterator[Tuple[str, str]]:
 
 def test_register_implementation_in_fsspec() -> None:
     """Test registering a filesystem with fsspec."""
-    known_implementations.pop(PROTOCOL)
+
+    # setup
+    previous_registration_existed = False
+    if PROTOCOL in known_implementations:
+        known_implementations.pop(PROTOCOL)
+        previous_registration_existed = True
+
     assert (
         not PROTOCOL in known_implementations
     ), f"As a test precondition, {PROTOCOL} should not be registered."
 
+    # do and test
     register_implementation_in_fsspec()
     assert PROTOCOL in available_protocols(), f"{PROTOCOL} should be registered."
 
     cls = get_filesystem_class(PROTOCOL)
     assert cls == GitPythonFileSystem
+
+    # teardown
+    if not previous_registration_existed:
+        known_implementations.pop(PROTOCOL)
+        assert (
+            not PROTOCOL in known_implementations
+        ), f"As a test postcondition, {PROTOCOL} should not be registered, which was the original state."
 
 
 def test_instantiate_fsspec_filesystem(repo_fixture: Iterator[Tuple[str, str]]) -> None:
