@@ -1,8 +1,13 @@
-from typing import Dict
-import git
+from typing import TYPE_CHECKING, Dict, Any
+
+# lazy import git as it requires git to be installed
+if TYPE_CHECKING:
+    from git import Repo
+else:
+    Repo = Any
 
 
-def get_revisions_raw(repo: git.Repo, ref: str, path: str, object_type: str) -> str:
+def get_revisions_raw(repo: Repo, ref: str, path: str, object_type: str) -> str:
     """
     Get the git revisions at a given ref and path. Does not recurse into subdirectories.
 
@@ -18,7 +23,6 @@ def get_revisions_raw(repo: git.Repo, ref: str, path: str, object_type: str) -> 
     Returns:
         str: The revisions at the given ref and path, as would be on stdout".
     """
-
     git_cmd_runner = repo.git
 
     # todo: use pathlib?
@@ -44,7 +48,7 @@ def get_revisions_raw(repo: git.Repo, ref: str, path: str, object_type: str) -> 
     return out
 
 
-def get_revisions_all_raw(repo: git.Repo, ref: str) -> str:
+def get_revisions_all_raw(repo: Repo, ref: str) -> str:
     """
     Get the git revisions at a given ref for entire repo including subdirectories.
 
@@ -103,7 +107,7 @@ def parse_git_revlist(git_cmd_output: str) -> Dict[str, int]:
     return revisions_info
 
 
-def get_revisions_all(repo: git.Repo, ref: str) -> Dict[str, int]:
+def get_revisions_all(repo: Repo, ref: str) -> Dict[str, int]:
     """Example of getting revisions raw output and parsing it."""
 
     raw = get_revisions_all_raw(repo, ref)

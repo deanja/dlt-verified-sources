@@ -1,11 +1,18 @@
-from typing import List, Dict, Any, Optional, Union
+from typing import TYPE_CHECKING, List, Dict, Any, Optional, Union
 from fsspec.registry import register_implementation
 from fsspec.spec import AbstractFileSystem
 from fsspec.implementations.memory import MemoryFile
-import git
 from functools import lru_cache
 from gitpythonfs import git_cmd
 
+# lazy import git as it requires git to be installed
+if TYPE_CHECKING:
+    from git import Repo, Tree, Blob, Object
+else:
+    Repo = Any
+    Tree = Any 
+    Blob = Any
+    Object = Any
 
 def register_implementation_in_fsspec() -> None:
     """Dyanmically register the filesystem with fsspec.
@@ -66,13 +73,17 @@ class GitPythonFileSystem(AbstractFileSystem):
             ref (str): A branch, tag or commit hash to use.
                 Defaults to HEAD of the local repo.
         """
+        from git import Repo
+    
         super().__init__(**kwargs)
-        self.repo_path = repo_path
-        self.repo = git.Repo(self.repo_path)
 
-        # throw error early if bad ref. ToDo: check this whenever ref passed to any method
+        self.repo_path = repo_path
+        self.repo = Repo(self.repo_path)
+
+        # error early if bad ref. ToDo: check this whenever ref passed to any method
         if ref:
             self.repo.commit(ref)
+        
         self.ref = ref or self.repo.head.ref.name
 
         self._get_tree = lru_cache(maxsize=128)(self._get_tree_uncached)
@@ -80,7 +91,7 @@ class GitPythonFileSystem(AbstractFileSystem):
             self._get_revision_details_uncached
         )
 
-    def _get_tree_uncached(self, ref: str) -> git.Tree:
+    def _get_tree_uncached(self, ref: str) -> Tree:
         """Get the tree at repo root for a given ref
 
         Args:
@@ -100,7 +111,6 @@ class GitPythonFileSystem(AbstractFileSystem):
         Returns:
             Dict[str, int]: A dictionary mapping file path to file's last modified time
         """
-
         result: Dict[str, int] = git_cmd.parse_git_revlist(
             git_cmd.get_revisions_all_raw(self.repo, ref or self.ref)
         )
@@ -135,10 +145,12 @@ class GitPythonFileSystem(AbstractFileSystem):
             out["ref"], path = path.split("@", 1)
         return out
 
-    def _git_type_to_file_type(self, object: git.Object) -> str:
-        if isinstance(object, git.Blob):
+    def _git_type_to_file_type(self, object: Object) -> str:
+        from git import Tree, Blob
+
+        if isinstance(object, Blob):
             return "file"
-        elif isinstance(object, git.Tree):
+        elif isinstance(object, Tree):
             return "directory"
         else:
             msg = f"There is no fileystem object type corresponding to Git object type: {type(object).__name__}"
@@ -146,7 +158,7 @@ class GitPythonFileSystem(AbstractFileSystem):
 
     def _details(
         self,
-        object: git.Object,
+        object: Object,
         ref: Optional[str] = None,
         include_committed_date: bool = True,
     ) -> Dict[str, Union[str, int]]:
@@ -185,6 +197,8 @@ class GitPythonFileSystem(AbstractFileSystem):
         self, path: str, detail: bool = False, ref: Optional[str] = None, **kwargs: Any
     ) -> Union[List[str], List[Dict[str, Any]]]:
         """List files at given path in the repo."""
+        from git import Tree
+
         path = self._strip_protocol(path)
         results = []
 
@@ -192,7 +206,7 @@ class GitPythonFileSystem(AbstractFileSystem):
         tree = self._get_tree(ref or self.ref)
 
         object_at_path = tree if path == "" else tree / path
-        if isinstance(object_at_path, git.Tree):
+        if isinstance(object_at_path, Tree):
             if detail:
                 for object in object_at_path:
                     results.append(self._details(object, ref or self.ref, **kwargs))
