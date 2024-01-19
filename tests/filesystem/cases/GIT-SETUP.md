@@ -4,11 +4,11 @@ The `./git`folder contains a bare repo used for running tests for the `filesyste
 
 # Usage
 
-For example, use it to test a pipeline that reads files using the `gitpythonfs`fsspec implementation.
+For example, use it to test a pipeline that reads files using the `gitpythonfs` fsspec implementation.
 
 The repo is not needed for regular use of dlt.
 
-For the tests to pass, use the tag (aka `ref`) called `unmodified-samples`.  Using HEAD (the default) is intented to fail tests due to modifications such files not having the expected file name.  It allows testing of the `ref` functionality of git-based fsspec implementations.
+For the tests to pass, use the tag (aka `ref`) called `unmodified-samples`.  Using HEAD (the default) is intended to fail tests due to modifications such as a file not having the expected file name.  It allows testing of the `ref` functionality of git-based fsspec implementations.
 
 Some features of the repo are intentionally different to the containing repo (eg verified-sources repo) to help prevent mistakenly testing against (or modifying!) the wrong repo:
 
